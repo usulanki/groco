@@ -1,0 +1,8 @@
+Server/node_modules/
+Server/dist/
+Server/.env
+Server/*.js.map
+Server/*.pem
+Server/uploads/
+Server/.claude/
+Admin/node_modules
