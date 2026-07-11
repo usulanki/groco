@@ -17,5 +17,16 @@ declare module "express-serve-static-core" {
       role_code: string;
       outlet_id: number | null;
     };
+    deliveryAgent?: {
+      id: number;
+      first_name: string;
+      last_name: string;
+      email: string | null;
+      mobile: string;
+      store_id: number | null;
+      outlet_id: number | null;
+    };
+    // Client outlet context — set by outletMiddleware
+    outletIds?: number[];  // ordered nearest → farthest
   }
 }

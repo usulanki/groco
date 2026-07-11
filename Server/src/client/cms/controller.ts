@@ -146,6 +146,86 @@ export const getCartPageLayout = asyncHandler(async (req: Request, res: Response
   sendSuccess(res, { config: null });
 });
 
+export const getAppProductDetail = asyncHandler(async (req: Request, res: Response) => {
+  res.setHeader("Cache-Control", "no-store");
+  const storeId = req.query.store_id ? Number(req.query.store_id) : null;
+  if (storeId) {
+    const file = path.resolve("uploads/cms", `app-product-detail_${storeId}.json`);
+    if (fs.existsSync(file)) {
+      return sendSuccess(res, JSON.parse(fs.readFileSync(file, "utf-8")));
+    }
+  }
+  const fallback = readFirstCmsFile("app-product-detail");
+  if (fallback) return sendSuccess(res, fallback);
+  sendSuccess(res, { config: null });
+});
+
+export const getAppPaymentScreen = asyncHandler(async (req: Request, res: Response) => {
+  res.setHeader("Cache-Control", "no-store");
+  const storeId = req.query.store_id ? Number(req.query.store_id) : null;
+  if (storeId) {
+    const file = path.resolve("uploads/cms", `app-payment-screen_${storeId}.json`);
+    if (fs.existsSync(file)) {
+      return sendSuccess(res, JSON.parse(fs.readFileSync(file, "utf-8")));
+    }
+  }
+  const fallback = readFirstCmsFile("app-payment-screen");
+  if (fallback) return sendSuccess(res, fallback);
+  sendSuccess(res, { config: null });
+});
+
+export const getAppHomepageLayout = asyncHandler(async (req: Request, res: Response) => {
+  const storeId = req.query.store_id ? Number(req.query.store_id) : null;
+
+  if (storeId) {
+    const file = path.resolve("uploads/cms", `app-homepage_${storeId}.json`);
+    if (fs.existsSync(file)) {
+      const components = JSON.parse(fs.readFileSync(file, "utf-8"));
+      res.setHeader("Cache-Control", "public, max-age=1800");
+      return sendSuccess(res, { components });
+    }
+  }
+
+  const fallback = readFirstCmsFile("app-homepage") as { components?: unknown } | null;
+  if (fallback) {
+    res.setHeader("Cache-Control", "public, max-age=1800");
+    return sendSuccess(res, { components: fallback.components ?? fallback });
+  }
+
+  res.setHeader("Cache-Control", "public, max-age=60");
+  sendSuccess(res, { components: [] });
+});
+
+export const getAppHeader = asyncHandler(async (req: Request, res: Response) => {
+  res.setHeader("Cache-Control", "no-store");
+  const storeId = req.query.store_id ? Number(req.query.store_id) : null;
+  if (storeId) {
+    const file = path.resolve("uploads/cms", `app-header_${storeId}.json`);
+    if (fs.existsSync(file)) {
+      return sendSuccess(res, JSON.parse(fs.readFileSync(file, "utf-8")));
+    }
+  }
+  const fallback = readFirstCmsFile("app-header");
+  if (fallback) return sendSuccess(res, fallback);
+  sendSuccess(res, { config: null });
+});
+
+export const getAppFooter = asyncHandler(async (req: Request, res: Response) => {
+  res.setHeader("Cache-Control", "no-store");
+  const storeId = req.query.store_id ? Number(req.query.store_id) : null;
+
+  if (storeId) {
+    const file = path.resolve("uploads/cms", `app-footer_${storeId}.json`);
+    if (fs.existsSync(file)) {
+      return sendSuccess(res, JSON.parse(fs.readFileSync(file, "utf-8")));
+    }
+  }
+
+  const fallback = readFirstCmsFile("app-footer");
+  if (fallback) return sendSuccess(res, fallback);
+  sendSuccess(res, { config: null });
+});
+
 export const getCategoryLayout = asyncHandler(async (req: Request, res: Response) => {
   const storeId = req.query.store_id ? Number(req.query.store_id) : null;
   const slug    = typeof req.query.slug === "string" ? req.query.slug : undefined;

@@ -3,7 +3,8 @@ import jwt from "jsonwebtoken";
 import { User } from "../../models/index";
 import { env } from "../../config/env";
 import appleSignin from "apple-signin-auth";
-import type { RegisterDto, LoginDto, GoogleLoginDto, FacebookLoginDto, AppleLoginDto, AuthTokens, AuthUser } from "./types";
+import { sendMail } from "../../shared/utils/mailer";
+import type { RegisterDto, LoginDto, GoogleLoginDto, FacebookLoginDto, AppleLoginDto, ForgotPasswordDto, ResetPasswordDto, UpdateProfileDto, ChangePasswordDto, AuthTokens, AuthUser } from "./types";
 import type { AppError } from "../../shared/middleware/error.middleware";
 
 export const register = async (data: RegisterDto): Promise<AuthTokens> => {
@@ -102,7 +103,7 @@ export const facebookLogin = async (data: FacebookLoginDto): Promise<AuthTokens>
       }
     }
     if (!user) {
-      const email = profile.email ?? `fb_${profile.id}@noemail.karto`;
+      const email = profile.email ?? `fb_${profile.id}@noemail.groco`;
       user = await User.create({
         fname: profile.first_name,
         lname: profile.last_name,
@@ -148,7 +149,7 @@ export const appleLogin = async (data: AppleLoginDto): Promise<AuthTokens> => {
   }
 
   const appleId = payload.sub;
-  const email   = payload.email ?? `apple_${appleId}@noemail.karto`;
+  const email   = payload.email ?? `apple_${appleId}@noemail.groco`;
 
   let user = await User.findOne({ where: { apple_id: appleId, is_deleted: false } });
 
@@ -182,6 +183,94 @@ export const appleLogin = async (data: AppleLoginDto): Promise<AuthTokens> => {
 
   const authUser: AuthUser = { id: user.id, fname: user.fname, lname: user.lname, email: user.email };
   return { user: authUser, accessToken, refreshToken };
+};
+
+export const forgotPassword = async (data: ForgotPasswordDto): Promise<void> => {
+  const user = await User.findOne({ where: { email: data.email, is_deleted: false } });
+  // Always respond the same way to prevent email enumeration
+  if (!user) return;
+
+  const otp = String(Math.floor(100000 + Math.random() * 900000));
+  const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+  await user.update({ otp, otp_expiry: expiry });
+
+  await sendMail(
+    data.email,
+    "Groco — Password Reset OTP",
+    `<p>Hi ${user.fname},</p>
+     <p>Your password reset code is:</p>
+     <h2 style="letter-spacing:4px">${otp}</h2>
+     <p>This code expires in <strong>15 minutes</strong>. If you didn't request this, ignore this email.</p>`
+  );
+};
+
+export const resetPassword = async (data: ResetPasswordDto): Promise<void> => {
+  const user = await User.findOne({ where: { email: data.email, is_deleted: false } });
+  const invalid: AppError = Object.assign(new Error("Invalid or expired OTP"), { statusCode: 400 });
+
+  if (!user || !user.otp || !user.otp_expiry) throw invalid;
+  if (user.otp !== data.otp) throw invalid;
+  if (new Date() > user.otp_expiry) throw invalid;
+
+  const hashed = await bcrypt.hash(data.password, 10);
+  await user.update({ password: hashed, otp: null, otp_expiry: null });
+};
+
+export const getMe = async (id: number): Promise<AuthUser> => {
+  const user = await User.findOne({ where: { id, is_deleted: false } });
+  if (!user) {
+    const err: AppError = Object.assign(new Error("User not found"), { statusCode: 404 });
+    throw err;
+  }
+  return { id: user.id, fname: user.fname, lname: user.lname, email: user.email, phone: user.phone };
+};
+
+export const updateProfile = async (id: number, data: UpdateProfileDto): Promise<AuthUser> => {
+  const user = await User.findOne({ where: { id, is_deleted: false } });
+  if (!user) {
+    const err: AppError = Object.assign(new Error("User not found"), { statusCode: 404 });
+    throw err;
+  }
+  if (data.email && data.email !== user.email) {
+    const taken = await User.findOne({ where: { email: data.email } });
+    if (taken) {
+      const err: AppError = Object.assign(new Error("Email already in use"), { statusCode: 409 });
+      throw err;
+    }
+  }
+  if (data.phone && data.phone !== user.phone) {
+    const taken = await User.findOne({ where: { phone: data.phone } });
+    if (taken) {
+      const err: AppError = Object.assign(new Error("Phone number already in use"), { statusCode: 409 });
+      throw err;
+    }
+  }
+  await user.update({
+    ...(data.fname != null && { fname: data.fname }),
+    ...(data.lname != null && { lname: data.lname }),
+    ...(data.email != null && { email: data.email }),
+    ...(data.phone !== undefined && { phone: data.phone }),
+  });
+  return { id: user.id, fname: user.fname, lname: user.lname, email: user.email, phone: user.phone };
+};
+
+export const changePassword = async (id: number, data: ChangePasswordDto): Promise<void> => {
+  const user = await User.findOne({ where: { id, is_deleted: false } });
+  if (!user) {
+    const err: AppError = Object.assign(new Error("User not found"), { statusCode: 404 });
+    throw err;
+  }
+  if (!user.password) {
+    const err: AppError = Object.assign(new Error("Password change not available for social login accounts"), { statusCode: 400 });
+    throw err;
+  }
+  const valid = await bcrypt.compare(data.current_password, user.password);
+  if (!valid) {
+    const err: AppError = Object.assign(new Error("Current password is incorrect"), { statusCode: 400 });
+    throw err;
+  }
+  const hashed = await bcrypt.hash(data.new_password, 10);
+  await user.update({ password: hashed });
 };
 
 export const login = async (data: LoginDto): Promise<AuthTokens> => {

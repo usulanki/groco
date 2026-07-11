@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import sequelize from "../../config/database";
-import { Order, OrderItem, Product, User, Outlet, Address, City, State, Discount, CustomerGroupMember, CustomerGroup, OrderHistory } from "../../models/index";
+import { Order, OrderItem, Product, ProductVariant, VariantAttributeValue, VariantAttribute, User, Outlet, Address, City, State, Discount, CustomerGroupMember, CustomerGroup, OrderHistory } from "../../models/index";
 import type { AppError } from "../../shared/middleware/error.middleware";
 import type { CreateOrderDto, OrderStatus } from "./types";
 
@@ -43,13 +43,15 @@ export const listOrders = async (params: {
   order_status?: OrderStatus | OrderStatus[];
   search?: string;
   customer_id?: number;
+  outlet_id?: number;
   sort_order?: "ASC" | "DESC";
   date_from?: string;
   date_to?: string;
 }) => {
-  const { page, limit, order_status, search, customer_id, sort_order = "DESC", date_from, date_to } = params;
+  const { page, limit, order_status, search, customer_id, outlet_id, sort_order = "DESC", date_from, date_to } = params;
 
   const where: Record<string, unknown> = {};
+  if (outlet_id) where.outlet_id = outlet_id;
   if (order_status) {
     where.order_status = Array.isArray(order_status) && order_status.length > 1
       ? { [Op.in]: order_status }
@@ -58,9 +60,14 @@ export const listOrders = async (params: {
   if (customer_id) where.user_id = customer_id;
   if (search)      where.order_no = { [Op.like]: `%${search}%` };
   if (date_from || date_to) {
+    let toDate: Date | undefined
+    if (date_to) {
+      toDate = new Date(date_to)
+      toDate.setUTCDate(toDate.getUTCDate() + 1) // include the full to-date day in UTC
+    }
     where.created_ts = {
       ...(date_from && { [Op.gte]: new Date(date_from) }),
-      ...(date_to   && { [Op.lte]: new Date(date_to)   }),
+      ...(toDate    && { [Op.lt]:  toDate }),
     };
   }
 
@@ -80,7 +87,22 @@ export const listOrders = async (params: {
         model: OrderItem,
         where: { is_deleted: false },
         required: false,
-        include: [{ model: Product, attributes: ["id", "name", "product_code"] }],
+        include: [
+          { model: Product, attributes: ["id", "name", "product_code"] },
+          {
+            model: ProductVariant,
+            as: "Variant",
+            attributes: ["id", "sku"],
+            required: false,
+            include: [{
+              model: VariantAttributeValue,
+              as: "attributeValues",
+              attributes: ["id", "value"],
+              through: { attributes: [] },
+              include: [{ model: VariantAttribute, as: "attribute", attributes: ["id", "name"] }],
+            }],
+          },
+        ],
       },
     ],
     limit,
@@ -119,7 +141,22 @@ export const getOrderById = async (id: number) => {
         model: OrderItem,
         where: { is_deleted: false },
         required: false,
-        include: [{ model: Product, attributes: ["id", "name", "product_code"] }],
+        include: [
+          { model: Product, attributes: ["id", "name", "product_code"] },
+          {
+            model: ProductVariant,
+            as: "Variant",
+            attributes: ["id", "sku"],
+            required: false,
+            include: [{
+              model: VariantAttributeValue,
+              as: "attributeValues",
+              attributes: ["id", "value"],
+              through: { attributes: [] },
+              include: [{ model: VariantAttribute, as: "attribute", attributes: ["id", "name"] }],
+            }],
+          },
+        ],
       },
     ],
   });
@@ -208,6 +245,7 @@ export const createOrder = async (
         payment_reference: data.payment_reference ?? null,
         notes:             data.notes ?? null,
         source:            "ADMIN",
+        order_status:      "order_placed",
       },
       { transaction: t }
     );

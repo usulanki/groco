@@ -1,4 +1,4 @@
-export type OrderStatus = "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+export type OrderStatus = "order_placed" | "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
 export type PaymentMode = "cod" | "online" | "wallet" | "card" | "upi";
 
 export interface CreateOrderItemDto {

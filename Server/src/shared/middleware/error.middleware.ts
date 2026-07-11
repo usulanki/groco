@@ -11,7 +11,8 @@ export const errorMiddleware = (
   res: Response,
   _next: NextFunction
 ): void => {
-  if (process.env["NODE_ENV"] !== "production") {
+  const statusCode = (err as AppError).statusCode ?? 500;
+  if (process.env["NODE_ENV"] !== "production" && statusCode >= 500) {
     console.error(err);
   }
 
@@ -35,7 +36,6 @@ export const errorMiddleware = (
     return;
   }
 
-  const statusCode = (err as AppError).statusCode ?? 500;
   const message = err.message ?? "Internal Server Error";
 
   res.status(statusCode).json({

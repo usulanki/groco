@@ -328,11 +328,11 @@ async function run() {
   console.log("DB connected.");
 
   const [stores] = await sequelize.query(
-    "SELECT id, name FROM stores WHERE name = 'Karto Main Store' LIMIT 1"
+    "SELECT id, name FROM stores WHERE name = 'Groco Main Store' LIMIT 1"
   ) as [Array<{ id: number; name: string }>, unknown];
 
   if (stores.length === 0) {
-    console.error("Karto Main Store not found. Run seed.ts first.");
+    console.error("Groco Main Store not found. Run seed.ts first.");
     process.exit(1);
   }
 
@@ -530,7 +530,7 @@ async function run() {
           const barcode = genBarcode(catIdx, prodIdx, varIdx);
           const attrKey = `${def.attribute}:${varDef.value}`;
           const attrValueId = attrValueIdMap.get(attrKey)!;
-          const imgSeed = `karto-auto-${def.code.toLowerCase()}-${String(prodIdx + 1).padStart(2, "0")}-v${varIdx + 1}`;
+          const imgSeed = `groco-auto-${def.code.toLowerCase()}-${String(prodIdx + 1).padStart(2, "0")}-v${varIdx + 1}`;
 
           await sequelize.query(
             `INSERT INTO product_variants

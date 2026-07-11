@@ -6,7 +6,7 @@
  *   3. INSERT statements for every row
  *
  * Usage: npx tsx src/scripts/dump-database.ts
- * Output: karto-dump.sql (project root)
+ * Output: groco-dump.sql (project root)
  */
 
 import mysql from "mysql2/promise";
@@ -21,7 +21,7 @@ const DB_PORT = parseInt(process.env.DB_PORT ?? "3306", 10);
 const DB_NAME = process.env.DB_NAME!;
 const DB_USER = process.env.DB_USER!;
 const DB_PASSWORD = process.env.DB_PASSWORD!;
-const OUTPUT_FILE = path.resolve(process.cwd(), "karto-dump.sql");
+const OUTPUT_FILE = path.resolve(process.cwd(), "groco-dump.sql");
 
 function escapeValue(val: unknown): string {
   if (val === null || val === undefined) return "NULL";
@@ -58,7 +58,7 @@ function escapeValue(val: unknown): string {
 
     const lines: string[] = [];
 
-    lines.push("-- karto-dump.sql");
+    lines.push("-- groco-dump.sql");
     lines.push(`-- Generated: ${new Date().toISOString()}`);
     lines.push(`-- Source: ${DB_HOST}/${DB_NAME}`);
     lines.push("");

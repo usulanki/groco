@@ -107,6 +107,7 @@ export const listProducts = async (
       include: [
         [literal("(SELECT COUNT(*) FROM product_variants WHERE product_id = `Product`.`id` AND is_deleted = 0)"), "variant_count"],
         [literal("(SELECT COUNT(*) FROM product_media WHERE product_id = `Product`.`id`)"), "media_count"],
+        [literal("(SELECT m.path FROM product_media pm JOIN media m ON m.id = pm.media_id WHERE pm.product_id = `Product`.`id` AND pm.is_primary = 1 LIMIT 1)"), "primary_image"],
       ],
     },
     include: [

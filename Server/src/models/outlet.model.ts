@@ -1,6 +1,22 @@
 import { DataTypes, Model, type Optional } from "sequelize";
 import sequelize from "../config/database";
 
+export interface DaySlot {
+  enabled: boolean;
+  open: string;
+  close: string;
+}
+
+export interface DeliverySlots {
+  monday: DaySlot;
+  tuesday: DaySlot;
+  wednesday: DaySlot;
+  thursday: DaySlot;
+  friday: DaySlot;
+  saturday: DaySlot;
+  sunday: DaySlot;
+}
+
 interface OutletAttributes {
   id: number;
   name: string;
@@ -16,11 +32,16 @@ interface OutletAttributes {
   pincode?: string | null;
   is_deleted: boolean;
   status: boolean;
+  instant_delivery_enabled: boolean;
+  slot_delivery_enabled: boolean;
+  delivery_slots: DeliverySlots | null;
+  serviceable_distance_km: number;
+  delivery_charge_per_km: number;
   created_ts?: Date;
   created_by?: number | null;
 }
 
-type OutletCreationAttributes = Optional<OutletAttributes, "id" | "is_deleted" | "status">;
+type OutletCreationAttributes = Optional<OutletAttributes, "id" | "is_deleted" | "status" | "instant_delivery_enabled" | "slot_delivery_enabled" | "delivery_slots" | "serviceable_distance_km" | "delivery_charge_per_km">;
 
 class Outlet extends Model<OutletAttributes, OutletCreationAttributes> implements OutletAttributes {
   declare id: number;
@@ -37,6 +58,11 @@ class Outlet extends Model<OutletAttributes, OutletCreationAttributes> implement
   declare pincode: string | null;
   declare is_deleted: boolean;
   declare status: boolean;
+  declare instant_delivery_enabled: boolean;
+  declare slot_delivery_enabled: boolean;
+  declare delivery_slots: DeliverySlots | null;
+  declare serviceable_distance_km: number;
+  declare delivery_charge_per_km: number;
   declare created_ts: Date;
   declare created_by: number | null;
 }
@@ -65,6 +91,11 @@ Outlet.init(
     pincode: { type: DataTypes.STRING, allowNull: true },
     is_deleted: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     status: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
+    instant_delivery_enabled: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    slot_delivery_enabled: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    delivery_slots: { type: DataTypes.JSON, allowNull: true, defaultValue: null },
+    serviceable_distance_km: { type: DataTypes.TINYINT.UNSIGNED, allowNull: false, defaultValue: 5 },
+    delivery_charge_per_km: { type: DataTypes.DECIMAL(8, 2), allowNull: false, defaultValue: 10 },
     created_ts: { type: DataTypes.DATE, field: "created_ts" },
     created_by: {
       type: DataTypes.INTEGER.UNSIGNED,

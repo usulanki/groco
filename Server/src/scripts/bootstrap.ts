@@ -36,7 +36,7 @@ import Admin from "../models/admin.model";
       defaults: {
         fname: "Super",
         lname: "Admin",
-        email: "superadmin@karto.com",
+        email: "superadmin@groco.com",
         username: "superadmin",
         password: passwordHash,
         role_id: superadminRole.id,

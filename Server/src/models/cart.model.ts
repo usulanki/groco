@@ -5,17 +5,19 @@ interface CartAttributes {
   id: number;
   user_id: number;
   product_id: number;
+  variant_id: number | null;
   quantity: number;
   is_removed: boolean;
   created_ts?: Date;
 }
 
-type CartCreationAttributes = Optional<CartAttributes, "id" | "is_removed">;
+type CartCreationAttributes = Optional<CartAttributes, "id" | "is_removed" | "variant_id">;
 
 class Cart extends Model<CartAttributes, CartCreationAttributes> implements CartAttributes {
   declare id: number;
   declare user_id: number;
   declare product_id: number;
+  declare variant_id: number | null;
   declare quantity: number;
   declare is_removed: boolean;
   declare created_ts: Date;
@@ -33,6 +35,12 @@ Cart.init(
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
       references: { model: "products", key: "id" },
+    },
+    variant_id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: true,
+      defaultValue: null,
+      references: { model: "product_variants", key: "id" },
     },
     quantity: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, defaultValue: 1 },
     is_removed: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },

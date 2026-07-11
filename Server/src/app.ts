@@ -37,6 +37,7 @@ import adminBackgroundJobsRouter from "./admin/background-jobs/routes";
 import adminSettingMenusRouter from "./admin/setting-menus/routes";
 import adminLocationsRouter from "./admin/locations/routes";
 import adminDeliveryPartnersRouter from "./admin/delivery-partners/routes";
+import adminDeliveryAgentsRouter from "./admin/delivery-agents/routes";
 import adminCmsRouter from "./admin/cms/routes";
 import adminOverviewRouter from "./admin/overview/routes";
 // Client routes
@@ -51,7 +52,13 @@ import reviewsRouter from "./client/reviews/routes";
 import wishlistRouter from "./client/wishlist/routes";
 import addressRouter from "./client/address/routes";
 import locationsRouter from "./client/locations/routes";
+import clientOutletsRouter from "./client/outlets/routes";
 import clientCmsRouter from "./client/cms/routes";
+// Delivery routes
+import deliveryAuthRouter    from "./delivery/auth/routes";
+import deliveryOrdersRouter  from "./delivery/orders/routes";
+import deliveryOutletsRouter from "./delivery/outlets/routes";
+import deliveryWalletRouter  from "./delivery/wallet/routes";
 
 const app = express();
 
@@ -106,6 +113,7 @@ app.use("/api/admin/background-jobs", adminBackgroundJobsRouter);
 app.use("/api/admin/setting-menus", adminSettingMenusRouter);
 app.use("/api/admin/locations", adminLocationsRouter);
 app.use("/api/admin/delivery-partners", adminDeliveryPartnersRouter);
+app.use("/api/admin/delivery-agents", adminDeliveryAgentsRouter);
 app.use("/api/admin", adminCmsRouter);
 app.use("/api/admin/overview", adminOverviewRouter);
 // Client API
@@ -120,7 +128,13 @@ app.use("/api/reviews", reviewsRouter);
 app.use("/api/wishlist", wishlistRouter);
 app.use("/api/addresses", addressRouter);
 app.use("/api/locations", locationsRouter);
+app.use("/api/outlets", clientOutletsRouter);
 app.use("/api/cms", clientCmsRouter);
+// Delivery API
+app.use("/api/delivery/auth",    deliveryAuthRouter);
+app.use("/api/delivery/orders",  deliveryOrdersRouter);
+app.use("/api/delivery/outlets", deliveryOutletsRouter);
+app.use("/api/delivery/wallet",  deliveryWalletRouter);
 app.use(errorMiddleware);
 
 export default app;

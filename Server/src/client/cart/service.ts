@@ -35,13 +35,15 @@ export const addToCart = async (userId: string, item: CartItemDto) => {
     );
   }
 
+  const variantId = item.variantId != null ? Number(item.variantId) : null;
   if (existing) {
-    await existing.update({ quantity: newQty });
+    await existing.update({ quantity: newQty, variant_id: variantId ?? existing.variant_id });
   } else {
     await Cart.create({
-      user_id: Number(userId),
+      user_id:    Number(userId),
       product_id: Number(item.productId),
-      quantity: item.quantity,
+      variant_id: variantId,
+      quantity:   item.quantity,
     });
   }
   return getCart(userId);

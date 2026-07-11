@@ -40,12 +40,32 @@ function paymentPagePath(key: string) {
   return path.resolve("uploads/cms", `payment-page_${key}.json`);
 }
 
+function appHeaderPath(key: string) {
+  return path.resolve("uploads/cms", `app-header_${key}.json`);
+}
+
+function appFooterPath(key: string) {
+  return path.resolve("uploads/cms", `app-footer_${key}.json`);
+}
+
+function appProductDetailPath(key: string) {
+  return path.resolve("uploads/cms", `app-product-detail_${key}.json`);
+}
+
+function appPaymentScreenPath(key: string) {
+  return path.resolve("uploads/cms", `app-payment-screen_${key}.json`);
+}
+
 function accountPagePath(key: string) {
   return path.resolve("uploads/cms", `account-page_${key}.json`);
 }
 
 function checkoutPagePath(key: string) {
   return path.resolve("uploads/cms", `checkout-page_${key}.json`);
+}
+
+function appHomepagePath(key: string) {
+  return path.resolve("uploads/cms", `app-homepage_${key}.json`);
 }
 
 export const getHomepageLayout = asyncHandler(async (req: Request, res: Response) => {
@@ -234,4 +254,94 @@ export const savePaymentPageLayout = asyncHandler(async (req: Request, res: Resp
 
   fs.writeFileSync(paymentPagePath(layoutKey(req)), JSON.stringify({ config }), "utf-8");
   sendSuccess(res, null, "Payment page layout saved");
+});
+
+export const getAppHeader = asyncHandler(async (req: Request, res: Response) => {
+  const file = appHeaderPath(layoutKey(req));
+  if (!fs.existsSync(file)) return sendSuccess(res, { config: null });
+  sendSuccess(res, JSON.parse(fs.readFileSync(file, "utf-8")));
+});
+
+export const saveAppHeader = asyncHandler(async (req: Request, res: Response) => {
+  const { config } = req.body;
+  if (!config || typeof config !== "object" || Array.isArray(config)) {
+    return sendError(res, "config must be an object", 400);
+  }
+  const dir = path.resolve("uploads/cms");
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(appHeaderPath(layoutKey(req)), JSON.stringify({ config }), "utf-8");
+  sendSuccess(res, null, "App header saved");
+});
+
+export const getAppProductDetail = asyncHandler(async (req: Request, res: Response) => {
+  const file = appProductDetailPath(layoutKey(req));
+  if (!fs.existsSync(file)) return sendSuccess(res, { config: null });
+  sendSuccess(res, JSON.parse(fs.readFileSync(file, "utf-8")));
+});
+
+export const saveAppProductDetail = asyncHandler(async (req: Request, res: Response) => {
+  const { config } = req.body;
+  if (!config || typeof config !== "object" || Array.isArray(config)) {
+    return sendError(res, "config must be an object", 400);
+  }
+  const dir = path.resolve("uploads/cms");
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(appProductDetailPath(layoutKey(req)), JSON.stringify({ config }), "utf-8");
+  sendSuccess(res, null, "App product detail config saved");
+});
+
+export const getAppFooter = asyncHandler(async (req: Request, res: Response) => {
+  const file = appFooterPath(layoutKey(req));
+  if (!fs.existsSync(file)) return sendSuccess(res, { config: null });
+  sendSuccess(res, JSON.parse(fs.readFileSync(file, "utf-8")));
+});
+
+export const saveAppFooter = asyncHandler(async (req: Request, res: Response) => {
+  const { config } = req.body;
+  if (!config || typeof config !== "object" || Array.isArray(config)) {
+    return sendError(res, "config must be an object", 400);
+  }
+  const dir = path.resolve("uploads/cms");
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(appFooterPath(layoutKey(req)), JSON.stringify({ config }), "utf-8");
+  sendSuccess(res, null, "App footer saved");
+});
+
+export const getAppPaymentScreen = asyncHandler(async (req: Request, res: Response) => {
+  const file = appPaymentScreenPath(layoutKey(req));
+  if (!fs.existsSync(file)) return sendSuccess(res, { config: null });
+  sendSuccess(res, JSON.parse(fs.readFileSync(file, "utf-8")));
+});
+
+export const saveAppPaymentScreen = asyncHandler(async (req: Request, res: Response) => {
+  const { config } = req.body;
+  if (!config || typeof config !== "object" || Array.isArray(config)) {
+    return sendError(res, "config must be an object", 400);
+  }
+  const dir = path.resolve("uploads/cms");
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(appPaymentScreenPath(layoutKey(req)), JSON.stringify({ config }), "utf-8");
+  sendSuccess(res, null, "App payment screen saved");
+});
+
+export const getAppHomepageLayout = asyncHandler(async (req: Request, res: Response) => {
+  const file = appHomepagePath(layoutKey(req));
+  if (!fs.existsSync(file)) {
+    return sendSuccess(res, { components: [] });
+  }
+  const components = JSON.parse(fs.readFileSync(file, "utf-8"));
+  sendSuccess(res, { components });
+});
+
+export const saveAppHomepageLayout = asyncHandler(async (req: Request, res: Response) => {
+  const { components } = req.body;
+  if (!Array.isArray(components)) {
+    return sendError(res, "components must be an array", 400);
+  }
+
+  const dir = path.resolve("uploads/cms");
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+  fs.writeFileSync(appHomepagePath(layoutKey(req)), JSON.stringify(components), "utf-8");
+  sendSuccess(res, null, "App homepage layout saved");
 });

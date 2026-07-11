@@ -62,8 +62,9 @@ export const createPaymentIntent = async (
     order_amount: subtotal,
     total:        subtotal,
     payment_mode: "online",
+    order_status: "order_placed",
     source:       "WEBSITE",
-  });
+  } as any);
 
   // 4. Create OrderItems
   await Promise.all(
@@ -74,6 +75,7 @@ export const createPaymentIntent = async (
       return OrderItem.create({
         order_id:   order.id,
         product_id: item.product_id,
+        variant_id: item.variant_id ?? null,
         quantity:   item.quantity,
         price:      unitPrice,
         total:      unitPrice * item.quantity,
@@ -129,12 +131,9 @@ export const confirmPayment = async (
   if (!payment) throw Object.assign(new Error("Payment record not found"), { statusCode: 404 });
 
   await payment.update({ status: "success" });
-  await order.update({
-    order_status:      "confirmed",
-    payment_reference: data.stripePaymentIntentId,
-  });
+  await order.update({ payment_reference: data.stripePaymentIntentId });
 
-  return { orderId: order.id, status: "confirmed" };
+  return { orderId: order.id, status: "order_placed" };
 };
 
 // ─── Create Order + Razorpay Order ───────────────────────────────────────────
@@ -183,8 +182,9 @@ export const createRazorpayOrder = async (
     order_amount: subtotal,
     total:        subtotal,
     payment_mode: "online",
+    order_status: "order_placed",
     source:       "WEBSITE",
-  });
+  } as any);
 
   await Promise.all(
     cartItems.map((item) => {
@@ -194,6 +194,7 @@ export const createRazorpayOrder = async (
       return OrderItem.create({
         order_id:   order.id,
         product_id: item.product_id,
+        variant_id: item.variant_id ?? null,
         quantity:   item.quantity,
         price:      unitPrice,
         total:      unitPrice * item.quantity,
@@ -248,8 +249,8 @@ export const verifyRazorpayPayment = async (
   const payment = await Payment.findOne({ where: { order_id: order.id } });
   if (!payment) throw Object.assign(new Error("Payment record not found"), { statusCode: 404 });
 
-  await order.update({ order_status: "confirmed", payment_reference: data.razorpay_payment_id });
+  await order.update({ payment_reference: data.razorpay_payment_id });
   await payment.update({ status: "success" });
 
-  return { orderId: order.id, status: "confirmed" };
+  return { orderId: order.id, status: "order_placed" };
 };

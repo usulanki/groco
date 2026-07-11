@@ -9,6 +9,9 @@ router.get("/:id",          controller.getById);
 router.post("/",            controller.create);
 router.put("/:id",          controller.update);
 router.delete("/:id",       controller.remove);
-router.patch("/:id/status", controller.toggleStatus);
+router.patch("/:id/status",               controller.toggleStatus);
+router.patch("/:id/delivery",             controller.updateDelivery);
+router.patch("/:id/serviceable-distance", controller.updateServiceableDistance);
+router.patch("/:id/delivery-charge",      controller.updateDeliveryCharge);
 
 export default router;

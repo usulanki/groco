@@ -4,7 +4,7 @@ import { sendSuccess } from "../../shared/utils/apiResponse";
 import * as service from "./service";
 
 export const getProducts = asyncHandler(async (req: Request, res: Response) => {
-  const products = await service.getProducts(req.query);
+  const products = await service.getProducts(req.query, req.outletIds);
   sendSuccess(res, products);
 });
 

@@ -52,43 +52,43 @@ async function seed() {
   const passwordHash = await bcrypt.hash("Password@123", 10);
 
   const [adminOne, createdOne] = await Admin.findOrCreate({
-    where: { email: "alice@karto.com" },
+    where: { email: "alice@groco.com" },
     defaults: {
       fname: "Alice",
       lname: "Smith",
-      email: "alice@karto.com",
+      email: "alice@groco.com",
       username: "alice.smith",
       password: passwordHash,
       role_id: adminRole.id,
     },
   });
-  console.log(`Admin alice@karto.com: ${createdOne ? "created" : "already exists"} (id=${adminOne.id})`);
+  console.log(`Admin alice@groco.com: ${createdOne ? "created" : "already exists"} (id=${adminOne.id})`);
 
   const [adminTwo, createdTwo] = await Admin.findOrCreate({
-    where: { email: "bob@karto.com" },
+    where: { email: "bob@groco.com" },
     defaults: {
       fname: "Bob",
       lname: "Jones",
-      email: "bob@karto.com",
+      email: "bob@groco.com",
       username: "bob.jones",
       password: passwordHash,
       role_id: adminRole.id,
     },
   });
-  console.log(`Admin bob@karto.com: ${createdTwo ? "created" : "already exists"} (id=${adminTwo.id})`);
+  console.log(`Admin bob@groco.com: ${createdTwo ? "created" : "already exists"} (id=${adminTwo.id})`);
 
   // 4. Dummy stores — owner must be an ADMIN-role admin
   const [storeOne, createdStore1] = await Store.findOrCreate({
-    where: { name: "Karto Main Store" },
-    defaults: { name: "Karto Main Store", owner_id: adminOne.id, created_by: superAdmin.id },
+    where: { name: "Groco Main Store" },
+    defaults: { name: "Groco Main Store", owner_id: adminOne.id, created_by: superAdmin.id },
   });
-  console.log(`Store "Karto Main Store": ${createdStore1 ? "created" : "already exists"} (id=${storeOne.id})`);
+  console.log(`Store "Groco Main Store": ${createdStore1 ? "created" : "already exists"} (id=${storeOne.id})`);
 
   const [storeTwo, createdStore2] = await Store.findOrCreate({
-    where: { name: "Karto West Branch" },
-    defaults: { name: "Karto West Branch", owner_id: adminTwo.id, created_by: superAdmin.id },
+    where: { name: "Groco West Branch" },
+    defaults: { name: "Groco West Branch", owner_id: adminTwo.id, created_by: superAdmin.id },
   });
-  console.log(`Store "Karto West Branch": ${createdStore2 ? "created" : "already exists"} (id=${storeTwo.id})`);
+  console.log(`Store "Groco West Branch": ${createdStore2 ? "created" : "already exists"} (id=${storeTwo.id})`);
 
   // 5. Custom store-scoped role for store 1
   const [customRole, createdCustom] = await Role.findOrCreate({
@@ -109,46 +109,46 @@ async function seed() {
 
   // 6. Dummy MANAGER admins (one per outlet)
   const [managerOne, createdMgr1] = await Admin.findOrCreate({
-    where: { email: "charlie@karto.com" },
+    where: { email: "charlie@groco.com" },
     defaults: {
       fname: "Charlie",
       lname: "Brown",
-      email: "charlie@karto.com",
+      email: "charlie@groco.com",
       username: "charlie.brown",
       password: passwordHash,
       role_id: managerRole.id,
     },
   });
   await managerOne.update({ store_id: storeOne.id });
-  console.log(`Manager charlie@karto.com: ${createdMgr1 ? "created" : "already exists"} (id=${managerOne.id})`);
+  console.log(`Manager charlie@groco.com: ${createdMgr1 ? "created" : "already exists"} (id=${managerOne.id})`);
 
   const [managerTwo, createdMgr2] = await Admin.findOrCreate({
-    where: { email: "diana@karto.com" },
+    where: { email: "diana@groco.com" },
     defaults: {
       fname: "Diana",
       lname: "Prince",
-      email: "diana@karto.com",
+      email: "diana@groco.com",
       username: "diana.prince",
       password: passwordHash,
       role_id: managerRole.id,
     },
   });
   await managerTwo.update({ store_id: storeOne.id });
-  console.log(`Manager diana@karto.com: ${createdMgr2 ? "created" : "already exists"} (id=${managerTwo.id})`);
+  console.log(`Manager diana@groco.com: ${createdMgr2 ? "created" : "already exists"} (id=${managerTwo.id})`);
 
   const [managerThree, createdMgr3] = await Admin.findOrCreate({
-    where: { email: "eve@karto.com" },
+    where: { email: "eve@groco.com" },
     defaults: {
       fname: "Eve",
       lname: "Wilson",
-      email: "eve@karto.com",
+      email: "eve@groco.com",
       username: "eve.wilson",
       password: passwordHash,
       role_id: managerRole.id,
     },
   });
   await managerThree.update({ store_id: storeTwo.id });
-  console.log(`Manager eve@karto.com: ${createdMgr3 ? "created" : "already exists"} (id=${managerThree.id})`);
+  console.log(`Manager eve@groco.com: ${createdMgr3 ? "created" : "already exists"} (id=${managerThree.id})`);
 
   // 7. Dummy outlets — created_by must be the ADMIN of that store
   const [outlet1, createdOutlet1] = await Outlet.findOrCreate({
@@ -252,6 +252,8 @@ async function seed() {
     // Hidden system menus (status: false — excluded from sidebar)
     { name: "Roles",       link: "/roles",       sort_order: 8.0, icon: "shield", status: false },
     { name: "Permissions", link: "/permissions", sort_order: 9.0, icon: "lock",   status: false },
+    // Hidden feature menus (show_in_sidebar: false — permission-controlled, accessed via shortcut)
+    { name: "Billing", link: "/billing", sort_order: 10.0, icon: "billing", status: true, show_in_sidebar: false },
   ];
 
   const topMenus: Record<string, Menu> = {};
@@ -289,7 +291,7 @@ async function seed() {
   const permissionedMenus = [
     topMenus["Dashboard"]!, topMenus["Admins"]!, topMenus["Products"]!, topMenus["Materials"]!, topMenus["Masters"]!,
     subMenus["Category"]!, subMenus["Tax"]!, subMenus["UOM"]!, subMenus["Customer Groups"]!, subMenus["Variants"]!,
-    topMenus["Orders"]!, topMenus["Customers"]!, topMenus["Reports"]!,
+    topMenus["Orders"]!, topMenus["Customers"]!, topMenus["Reports"]!, topMenus["Billing"]!,
   ];
 
   const ordersMenu = topMenus["Orders"]!;

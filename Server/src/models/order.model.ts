@@ -1,7 +1,7 @@
 import { DataTypes, Model, type Optional } from "sequelize";
 import sequelize from "../config/database";
 
-export type OrderStatus  = "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+export type OrderStatus  = "order_placed" | "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
 export type PaymentMode  = "cod" | "online" | "wallet" | "card" | "upi";
 
 interface OrderAttributes {
@@ -15,19 +15,22 @@ interface OrderAttributes {
   tax: number;
   order_amount: number;
   discount_amount: number;
+  delivery_charge: number;
   invoice_no: string | null;
   source: string;
   total: number;
   payment_mode: PaymentMode;
   payment_reference: string | null;
   notes: string | null;
+  latitude: number | null;
+  longitude: number | null;
   created_ts?: Date;
   updated_ts?: Date;
 }
 
 type OrderCreationAttributes = Optional<
   OrderAttributes,
-  "id" | "order_status" | "invoice_no" | "address_id" | "discount_amount" | "payment_reference" | "notes"
+  "id" | "order_status" | "invoice_no" | "address_id" | "discount_amount" | "delivery_charge" | "payment_reference" | "notes" | "latitude" | "longitude"
 >;
 
 class Order extends Model<OrderAttributes, OrderCreationAttributes> implements OrderAttributes {
@@ -41,12 +44,15 @@ class Order extends Model<OrderAttributes, OrderCreationAttributes> implements O
   declare tax: number;
   declare order_amount: number;
   declare discount_amount: number;
+  declare delivery_charge: number;
   declare invoice_no: string | null;
   declare source: string;
   declare total: number;
   declare payment_mode: PaymentMode;
   declare payment_reference: string | null;
   declare notes: string | null;
+  declare latitude: number | null;
+  declare longitude: number | null;
   declare created_ts: Date;
   declare updated_ts: Date;
 }
@@ -60,12 +66,13 @@ Order.init(
     outlet_id:    { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     order_no:     { type: DataTypes.STRING(50), allowNull: false },
     order_status: {
-      type: DataTypes.ENUM("pending", "confirmed", "processing", "shipped", "delivered", "cancelled"),
+      type: DataTypes.ENUM("order_placed", "pending", "confirmed", "shipped", "delivered", "cancelled"),
       defaultValue: "pending",
     },
     tax:              { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
     order_amount:     { type: DataTypes.DECIMAL(10, 2), allowNull: false },
     discount_amount:  { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
+    delivery_charge:  { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
     invoice_no:       { type: DataTypes.STRING(50), allowNull: true, defaultValue: null },
     source:           { type: DataTypes.STRING(50), allowNull: false, defaultValue: "ADMIN" },
     total:            { type: DataTypes.DECIMAL(10, 2), allowNull: false },
@@ -76,6 +83,8 @@ Order.init(
     },
     payment_reference: { type: DataTypes.STRING(100), allowNull: true, defaultValue: null },
     notes:             { type: DataTypes.TEXT, allowNull: true, defaultValue: null },
+    latitude:          { type: DataTypes.DECIMAL(10, 7), allowNull: true, defaultValue: null },
+    longitude:         { type: DataTypes.DECIMAL(10, 7), allowNull: true, defaultValue: null },
   },
   {
     sequelize,

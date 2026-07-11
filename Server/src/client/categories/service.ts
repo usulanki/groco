@@ -4,7 +4,7 @@ import { Category, Media } from "../../models/index";
 const PUBLIC_ATTRS = ["id", "name", "slug"] as const;
 const MEDIA_ATTRS  = ["id", "path", "filename", "original_name"] as const;
 
-const BASE_WHERE = { is_deleted: false, status: true, store_id: null } as const;
+const BASE_WHERE = { is_deleted: false, status: true } as const;
 
 const childrenInclude = {
   model: Category,

@@ -13,6 +13,7 @@ export const list = asyncHandler(async (req: Request, res: Response) => {
     : rawStatus ? [rawStatus as OrderStatus] : undefined;
   const search       = (req.query["search"] as string | undefined)?.trim() || undefined;
   const customer_id  = req.query["customer_id"] ? parseInt(req.query["customer_id"] as string) : undefined;
+  const outlet_id    = req.query["outlet_id"]   ? parseInt(req.query["outlet_id"]   as string) : undefined;
   const sort_order   = (req.query["sort_order"] as "ASC" | "DESC" | undefined) ?? "DESC";
   const date_from    = (req.query["date_from"] as string | undefined) || undefined;
   const date_to      = (req.query["date_to"]   as string | undefined) || undefined;
@@ -24,6 +25,7 @@ export const list = asyncHandler(async (req: Request, res: Response) => {
     ...(order_status?.length && { order_status }),
     ...(search       && { search }),
     ...(customer_id  && { customer_id }),
+    ...(outlet_id    && { outlet_id }),
     ...(date_from    && { date_from }),
     ...(date_to      && { date_to }),
   });

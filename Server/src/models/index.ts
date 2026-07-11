@@ -50,6 +50,7 @@ import NotificationSetting from "./notificationSetting.model";
 import BackgroundJob from "./backgroundJob.model";
 import OrderHistory from "./orderHistory.model";
 import DeliveryPartner from "./deliveryPartner.model";
+import DeliveryAgent from "./deliveryAgent.model";
 import StoreFeatureFlag from "./storeFeatureFlag.model";
 // Admin <-> Role
 Role.hasMany(Admin, { foreignKey: "role_id" });
@@ -163,11 +164,13 @@ Order.belongsTo(Outlet, { foreignKey: "outlet_id" });
 // Order <-> Address
 Order.belongsTo(Address, { foreignKey: "address_id" });
 
-// OrderItem <-> Order & Product
+// OrderItem <-> Order, Product & ProductVariant
 Order.hasMany(OrderItem, { foreignKey: "order_id" });
 OrderItem.belongsTo(Order, { foreignKey: "order_id" });
 Product.hasMany(OrderItem, { foreignKey: "product_id" });
 OrderItem.belongsTo(Product, { foreignKey: "product_id" });
+ProductVariant.hasMany(OrderItem, { foreignKey: "variant_id", as: "orderItems" });
+OrderItem.belongsTo(ProductVariant, { foreignKey: "variant_id", as: "Variant" });
 
 // Payment <-> Order (one-to-one)
 Order.hasOne(Payment, { foreignKey: "order_id" });
@@ -406,5 +409,6 @@ export {
   BackgroundJob,
   OrderHistory,
   DeliveryPartner,
+  DeliveryAgent,
   StoreFeatureFlag,
 };
